@@ -46,7 +46,7 @@ def append_excel_file_as_new_sheet(path, file_name_list1, ueberhang_rows, ueberh
         ws_main_temp = wb_main.create_sheet(file_name_list1[i], i*3)
         copy_sheet(temp_ws, ws_main_temp)
         for s in range(1, 6):
-            color_id_column(s, 1, ws_main_temp.max_row+1, ws_main_temp, spaltenbreiten[s-1])
+            color_id_column(s, 1, ws_main_temp, spaltenbreiten[s-1])
         for c in range(6,ws_main_temp.max_column+1):
             color_lac_column(c, 2, ws_main_temp.max_row+1, ws_main_temp, c%2)
         openpyxl.worksheet.worksheet.Worksheet.set_printer_settings(ws_main_temp, paper_size = 12, orientation='landscape')
@@ -106,7 +106,7 @@ def swap_pair_of_columns(top_row, bottom_row, original_column, destinate_column,
 
 
 #ID-Einfärben
-def color_id_column(column, first_row, last_row, sheet, breite):
+def color_id_column(column, first_row, sheet, breite):
     sheet.column_dimensions[letter_list[column-1]].width = breite
     sheet.cell(row=1,column=column).fill = PatternFill(patternType='solid', fgColor=id_color[first_row%2])
     sheet.cell(row=1, column=column).font = Font(name='Calibri',
@@ -118,13 +118,18 @@ def color_id_column(column, first_row, last_row, sheet, breite):
                                                  strike=False,
                                                  color='ffffff')
     sheet.cell(row=1, column=column).border = Border(bottom=Side(border_style='thick'),
-                                                     left=Side(border_style='thick', color='000000'),
+                                                     left=Side(border_style='thin', color='000000'),
                                                      right=Side(border_style='thin', color='000000'))
-    for i in range(first_row+1, last_row):
-        sheet.cell(row=i, column=column).fill = PatternFill(patternType='solid', fgColor=id_color[i%2])
-        sheet.cell(row=i, column=column).border = Border(bottom=Side(border_style='thin', color='000000'),
-                                                         left=Side(border_style='thick', color='000000'),
-                                                         right=Side(border_style='thin', color='000000'))
+    for i in range(first_row, int(sheet.max_row/2)+1):
+        sheet.cell(row=(i*2)+1, column=column).fill = PatternFill(patternType='solid', fgColor=id_color[i%2])
+        sheet.cell(row=(i*2), column=column).fill = PatternFill(patternType='solid', fgColor=id_color[i % 2])
+        sheet.cell(row=(i*2)+1, column=column).border = Border(bottom=Side(border_style='thin', color='000000'),
+                                                                left=Side(border_style='thin', color='000000'),
+                                                                right=Side(border_style='thin', color='000000'))
+        sheet.cell(row=(i*2), column=column).border = Border(bottom=Side(border_style='thin', color='000000'),
+                                                         left=Side(border_style='thin', color='000000'),
+                                                         right=Side(border_style='thin', color='000000'),
+                                                               top=Side(border_style='thick', color='000000'))
 
 #LAC-Farbgebung für mit Grenzwertüberschreitung
 def color_lac_column(column, first_row, last_row, sheet, one_or_zero_for_color):
@@ -143,9 +148,16 @@ def color_lac_column(column, first_row, last_row, sheet, one_or_zero_for_color):
                                                      right=Side(border_style='thin', color='000000'))
     for i in range(first_row, last_row):
         color = 'ff0000'
-        sheet.cell(row=i, column=column).border = Border(bottom=Side(border_style='thin', color='000000'),
-                                                         left=Side(border_style='thick', color='000000'),
-                                                         right=Side(border_style='thin', color='000000'))
+        if i%2 == 1:
+            sheet.cell(row=i, column=column).border = Border(top=Side(border_style='thin', color='000000'),
+                                                             left=Side(border_style='thin', color='000000'),
+                                                             right=Side(border_style='thin', color='000000'),
+                                                             bottom=Side(border_style='thin', color='000000'))
+        else:
+            sheet.cell(row=i, column=column).border = Border(top=Side(border_style='thick', color='000000'),
+                                                             left=Side(border_style='thin', color='000000'),
+                                                             right=Side(border_style='thin', color='000000'),
+                                                             bottom=Side(border_style='thin', color='000000'))
         if sheet.cell(row=i,column=column).value != None:
             for y in range(0, 4):
                 t = sheet.cell(row=i,column=column).value
@@ -202,10 +214,10 @@ def get_unique_file_names(directory):
 source_path_workbooks = r'C:\Users\atpv1\Documents\Arbeit\Lennart\Schnoor\CityCenterBergedorf\Messungen\HOM\\'
 source_path_images = r'C:\Users\atpv1\Documents\Arbeit\Lennart\Schnoor\CityCenterBergedorf\Auswertungen\HOM_Bilder_resized\\'
 destinate_path = r'C:\Users\atpv1\Documents\Arbeit\Lennart\Schnoor\CityCenterBergedorf\Auswertungen\HOM\\'
-destinate_file = r'HOM_test.xlsx'
+destinate_file = r'HOM.xlsx'
                             # To open the workbook
 file_name_list = ['HOM']
-ueberschrift = 'Anlage 1: Messpunkte '
+ueberschrift = 'Anlage 3: Messpunkte '
 #get_unique_file_names(source_path_workbooks)#
 letter_list = ['a','b','c','d','e','f','g','h','i',
                'j','k','l','m','n','o','p','q','r',
